@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace HelpTeam\Repository;
 
+use HelpTeam\Support\Logger;
 use RedBeanPHP\R;
 use RuntimeException;
 
@@ -72,6 +73,12 @@ final class AdRepository
      */
     public function createMedia(int $adId, array $media): void
     {
+        Logger::info('ad_repository.create_media.start', [
+            'ad_id' => $adId,
+            'media_count' => count($media),
+            'paths' => array_map(static fn (array $item): string => (string) ($item['file_path'] ?? ''), $media),
+        ]);
+
         if ($media === []) {
             return;
         }
@@ -102,6 +109,11 @@ final class AdRepository
                 ]
             );
         }
+
+        Logger::info('ad_repository.create_media.done', [
+            'ad_id' => $adId,
+            'media_count' => count($media),
+        ]);
     }
 
     private function ensureRedBeanAvailable(): void

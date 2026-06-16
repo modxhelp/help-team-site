@@ -6,6 +6,7 @@ namespace HelpTeam\Controller;
 
 use HelpTeam\Repository\AdRepository;
 use HelpTeam\Service\MediaUploadService;
+use HelpTeam\Support\Logger;
 use Throwable;
 
 final class SubmitAdController
@@ -40,6 +41,12 @@ final class SubmitAdController
     {
         $old = $this->normalizeInput($input);
 
+        Logger::info('submit.media.files_payload', [
+            'has_media' => array_key_exists('media', $files),
+            'files_keys' => array_keys($files),
+            'media_keys' => isset($files['media']) && is_array($files['media']) ? array_keys($files['media']) : [],
+        ]);
+
         if ($this->honeypotFilled($input)) {
             $this->flash('success', self::SUCCESS_MESSAGE);
 
@@ -51,6 +58,17 @@ final class SubmitAdController
 
         if ($mediaValidation['errors'] !== []) {
             $errors['media'] = implode(' ', $mediaValidation['errors']);
+        }
+
+        Logger::info('submit.media.validation_result', [
+            'has_uploads' => (bool) ($mediaValidation['has_uploads'] ?? false),
+            'items_count' => count($mediaValidation['items']),
+            'errors_count' => count($mediaValidation['errors']),
+        ]);
+
+        if (($mediaValidation['has_uploads'] ?? false) && $mediaValidation['items'] === [] && $mediaValidation['errors'] === []) {
+            Logger::warning('submit.media.empty_items_without_errors');
+            $errors['media'] = 'Файлы не удалось обработать. Попробуйте выбрать файлы еще раз.';
         }
 
         if ($errors !== []) {
@@ -79,14 +97,29 @@ final class SubmitAdController
             ]);
 
             $storedMedia = $this->media->store($adId, $mediaValidation['items']);
+            Logger::info('submit.media.store_result', [
+                'ad_id' => $adId,
+                'stored_count' => count($storedMedia),
+            ]);
+
             $this->ads->createMedia($adId, $storedMedia);
 
             $this->ads->commit();
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
+            Logger::error('submit.save_failed', [
+                'exception' => $exception::class,
+                'message' => $exception->getMessage(),
+                'stored_media_count' => count($storedMedia),
+            ]);
+
             if ($transactionStarted) {
                 try {
                     $this->ads->rollback();
-                } catch (Throwable) {
+                } catch (Throwable $rollbackException) {
+                    Logger::error('submit.rollback_failed', [
+                        'exception' => $rollbackException::class,
+                        'message' => $rollbackException->getMessage(),
+                    ]);
                 }
             }
 

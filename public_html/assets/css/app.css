@@ -235,43 +235,49 @@ h2 {
 
 .catalog-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 24px;
+  margin-top: 28px;
+  align-items: stretch;
 }
 
 .ad-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(24, 48, 38, 0.12);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 18px 45px rgba(24, 48, 38, 0.08);
 }
 
 .ad-card-image,
 .ad-card-placeholder {
   width: 100%;
-  height: 220px;
+  height: 240px;
 }
 
 .ad-card-image {
   display: block;
   object-fit: cover;
+  background: #eef3ef;
 }
 
 .ad-card-placeholder {
-  display: grid;
-  place-items: center;
-  color: var(--accent-strong);
-  background:
-    linear-gradient(135deg, rgb(35 122 87 / 12%), transparent 55%),
-    var(--surface-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #607067;
+  background: #eef3ef;
   font-weight: 800;
 }
 
 .ad-card-body {
-  display: grid;
-  gap: 12px;
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
 }
 
 .ad-card-badges,
@@ -526,10 +532,6 @@ textarea {
   .filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .catalog-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 800px) {
@@ -551,8 +553,7 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .filters,
-  .catalog-grid {
+  .filters {
     grid-template-columns: 1fr;
   }
 

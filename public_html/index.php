@@ -2,23 +2,29 @@
 
 declare(strict_types=1);
 
-require dirname(__DIR__) . '/bootstrap/app.php';
+$appBootstrap = dirname(__DIR__) . '/help-team-site/bootstrap/app.php';
+
+if (!is_file($appBootstrap)) {
+    $appBootstrap = dirname(__DIR__) . '/bootstrap/app.php';
+}
+
+require $appBootstrap;
 
 $routes = [
     '/' => [
-        'title' => 'Каталог объявлений',
+        'title' => 'РљР°С‚Р°Р»РѕРі РѕР±СЉСЏРІР»РµРЅРёР№',
         'view' => 'home',
     ],
     '/submit' => [
-        'title' => 'Подать объявление',
+        'title' => 'РџРѕРґР°С‚СЊ РѕР±СЉСЏРІР»РµРЅРёРµ',
         'view' => 'submit',
     ],
     '/map' => [
-        'title' => 'Карта объявлений',
+        'title' => 'РљР°СЂС‚Р° РѕР±СЉСЏРІР»РµРЅРёР№',
         'view' => 'map',
     ],
     '/about' => [
-        'title' => 'О нас',
+        'title' => 'Рћ РЅР°СЃ',
         'view' => 'about',
     ],
 ];
@@ -31,7 +37,7 @@ if ($route === null) {
     http_response_code(404);
 
     $route = [
-        'title' => 'Страница не найдена',
+        'title' => 'РЎС‚СЂР°РЅРёС†Р° РЅРµ РЅР°Р№РґРµРЅР°',
         'view' => '404',
     ];
 }

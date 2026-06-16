@@ -25,10 +25,11 @@ $host = env('DB_HOST');
 $name = env('DB_NAME');
 $user = env('DB_USER');
 $port = env('DB_PORT', '3306');
-$password = env('DB_PASSWORD', '');
+$password = env('DB_PASS', env('DB_PASSWORD', ''));
+$charset = env('DB_CHARSET', 'utf8mb4');
 
 if ($host !== null && $name !== null && $user !== null && class_exists(R::class)) {
-    R::setup("mysql:host={$host};port={$port};dbname={$name};charset=utf8mb4", $user, $password);
+    R::setup("mysql:host={$host};port={$port};dbname={$name};charset={$charset}", $user, $password);
     R::freeze(env('APP_ENV', 'production') === 'production');
 }
 

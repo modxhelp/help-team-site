@@ -19,13 +19,7 @@ $hasError = static fn (string $key): bool => isset($errors[$key]);
     <input type="hidden" name="_token" value="<?= e($csrfToken) ?>">
     <input type="hidden" name="latitude" value="">
     <input type="hidden" name="longitude" value="">
-
-    <div class="honeypot" aria-hidden="true">
-        <label>
-            Сайт
-            <input type="text" name="website" tabindex="-1" autocomplete="off">
-        </label>
-    </div>
+    <input class="honeypot" type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
 
     <label class="field<?= $hasError('category') ? ' field-invalid' : '' ?>">
         <span>Категория <b aria-hidden="true">*</b></span>
@@ -42,17 +36,10 @@ $hasError = static fn (string $key): bool => isset($errors[$key]);
         <?php endif; ?>
     </label>
 
-    <div class="form-grid">
-        <label class="field">
-            <span>Кличка собаки</span>
-            <input name="dog_name" type="text" value="<?= e($value('dog_name')) ?>" maxlength="255" autocomplete="off">
-        </label>
-
-        <label class="field">
-            <span>Короткий заголовок</span>
-            <input name="title" type="text" value="<?= e($value('title')) ?>" maxlength="255" placeholder="Например, нужна передержка на неделю">
-        </label>
-    </div>
+    <label class="field">
+        <span>Кличка собаки</span>
+        <input name="dog_name" type="text" value="<?= e($value('dog_name')) ?>" maxlength="255" autocomplete="off">
+    </label>
 
     <label class="field<?= $hasError('body') ? ' field-invalid' : '' ?>">
         <span>Текст объявления <b aria-hidden="true">*</b></span>

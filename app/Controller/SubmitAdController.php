@@ -52,7 +52,7 @@ final class SubmitAdController
             $this->ads->create([
                 'category' => $old['category'],
                 'dog_name' => $this->nullable($old['dog_name']),
-                'title' => $this->nullable($old['title']),
+                'title' => null,
                 'body' => $old['body'],
                 'city' => $this->nullable($old['city']),
                 'address' => $this->nullable($old['address']),
@@ -99,7 +99,6 @@ final class SubmitAdController
         return [
             'category' => '',
             'dog_name' => '',
-            'title' => '',
             'body' => '',
             'city' => '',
             'address' => '',
@@ -118,7 +117,6 @@ final class SubmitAdController
         return [
             'category' => $this->clean($input['category'] ?? '', 50),
             'dog_name' => $this->clean($input['dog_name'] ?? '', 255),
-            'title' => $this->clean($input['title'] ?? '', 255),
             'body' => $this->clean($input['body'] ?? ''),
             'city' => $this->clean($input['city'] ?? '', 255),
             'address' => $this->clean($input['address'] ?? '', 500),

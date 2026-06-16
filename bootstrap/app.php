@@ -12,7 +12,26 @@ if (is_file($autoloadPath)) {
     require $autoloadPath;
 }
 
+spl_autoload_register(static function (string $class): void {
+    $prefix = 'HelpTeam\\';
+
+    if (!str_starts_with($class, $prefix)) {
+        return;
+    }
+
+    $relativeClass = substr($class, strlen($prefix));
+    $path = BASE_PATH . '/app/' . str_replace('\\', '/', $relativeClass) . '.php';
+
+    if (is_file($path)) {
+        require $path;
+    }
+});
+
 loadEnv(BASE_PATH . '/.env');
+
+if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!function_exists('e')) {
     function e(?string $value): string

@@ -8,9 +8,12 @@ document.querySelectorAll('.nav a').forEach((link) => {
   }
 });
 
-document.querySelectorAll('[data-submit-placeholder]').forEach((form) => {
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    form.querySelector('[data-form-status]').textContent = 'Форма подключится на следующем этапе.';
-  });
+const growTextarea = (textarea) => {
+  textarea.style.height = 'auto';
+  textarea.style.height = `${textarea.scrollHeight}px`;
+};
+
+document.querySelectorAll('textarea[data-autogrow]').forEach((textarea) => {
+  growTextarea(textarea);
+  textarea.addEventListener('input', () => growTextarea(textarea));
 });

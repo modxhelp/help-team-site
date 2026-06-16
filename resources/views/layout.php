@@ -3,6 +3,15 @@
 declare(strict_types=1);
 
 $viewPath = __DIR__ . '/pages/' . $view . '.php';
+$viewData = $viewData ?? [];
+$messages = $viewData['messages'] ?? [];
+
+if (isset($viewData['errors']['form'])) {
+    $messages[] = [
+        'type' => 'error',
+        'text' => $viewData['errors']['form'],
+    ];
+}
 ?>
 <!doctype html>
 <html lang="ru">
@@ -31,6 +40,16 @@ $viewPath = __DIR__ . '/pages/' . $view . '.php';
 
     <main class="page">
         <div class="container">
+            <?php if ($messages !== []): ?>
+                <div class="messages" role="status" aria-live="polite">
+                    <?php foreach ($messages as $message): ?>
+                        <div class="message message-<?= e($message['type'] ?? 'info') ?>">
+                            <?= e($message['text'] ?? '') ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
             <?php require $viewPath; ?>
         </div>
     </main>

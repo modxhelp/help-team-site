@@ -7,6 +7,9 @@
   --muted: #65746b;
   --accent: #237a57;
   --accent-strong: #155f43;
+  --danger: #b42318;
+  --danger-bg: #fff1ef;
+  --success-bg: #eaf7ef;
   --line: #dbe3dd;
   --shadow: 0 18px 45px rgb(28 37 32 / 10%);
   --radius: 8px;
@@ -216,10 +219,47 @@ h2 {
   padding: 24px;
 }
 
+.messages {
+  display: grid;
+  gap: 10px;
+  max-width: 720px;
+  margin-bottom: 24px;
+}
+
+.message {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  background: var(--surface);
+  font-weight: 700;
+}
+
+.message-success {
+  border-color: #b9dfc8;
+  color: #175d36;
+  background: var(--success-bg);
+}
+
+.message-error {
+  border-color: #f2b8b5;
+  color: var(--danger);
+  background: var(--danger-bg);
+}
+
 .form {
   display: grid;
   gap: 16px;
   max-width: 720px;
+}
+
+.ad-form {
+  gap: 18px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
 .field {
@@ -229,6 +269,10 @@ h2 {
 
 .field span {
   font-weight: 700;
+}
+
+.field b {
+  color: var(--danger);
 }
 
 input,
@@ -243,9 +287,42 @@ select {
   font: inherit;
 }
 
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent);
+  outline: 3px solid rgb(35 122 87 / 16%);
+}
+
 textarea {
   min-height: 132px;
+  overflow: hidden;
   resize: vertical;
+}
+
+.field-invalid input,
+.field-invalid textarea,
+.field-invalid select {
+  border-color: var(--danger);
+}
+
+.field-error {
+  color: var(--danger);
+  font-weight: 700;
+}
+
+.form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.honeypot {
+  position: absolute;
+  left: -100vw;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
 }
 
 .map-placeholder {
@@ -286,6 +363,10 @@ textarea {
   }
 
   .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid {
     grid-template-columns: 1fr;
   }
 }

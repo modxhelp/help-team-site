@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace HelpTeam\Controller;
 
 use HelpTeam\Repository\AdRepository;
+use HelpTeam\Service\MediaUploadService;
 use Throwable;
 
 final class SubmitAdController
@@ -16,7 +17,9 @@ final class SubmitAdController
      */
     public function __construct(
         private readonly AdRepository $ads,
-        private readonly array $categories
+        private readonly MediaUploadService $media,
+        private readonly array $categories,
+        private readonly string $yandexMapsApiKey = ''
     ) {
     }
 
@@ -30,9 +33,10 @@ final class SubmitAdController
 
     /**
      * @param array<string, mixed> $input
+     * @param array<string, mixed> $files
      * @return array<string, mixed>
      */
-    public function submit(array $input): array
+    public function submit(array $input, array $files): array
     {
         $old = $this->normalizeInput($input);
 
@@ -43,26 +47,51 @@ final class SubmitAdController
         }
 
         $errors = $this->validate($old, (string) ($input['_token'] ?? ''));
+        $mediaValidation = $this->media->validate($files['media'] ?? null);
+
+        if ($mediaValidation['errors'] !== []) {
+            $errors['media'] = implode(' ', $mediaValidation['errors']);
+        }
 
         if ($errors !== []) {
             return $this->formData($old, $errors);
         }
 
+        $storedMedia = [];
+        $transactionStarted = false;
+
         try {
-            $this->ads->create([
+            $this->ads->begin();
+            $transactionStarted = true;
+
+            $adId = $this->ads->create([
                 'category' => $old['category'],
                 'dog_name' => $this->nullable($old['dog_name']),
                 'title' => null,
                 'body' => $old['body'],
                 'city' => $this->nullable($old['city']),
                 'address' => $this->nullable($old['address']),
-                'latitude' => $this->coordinate($input['latitude'] ?? null, -90, 90),
-                'longitude' => $this->coordinate($input['longitude'] ?? null, -180, 180),
+                'latitude' => $this->coordinate($old['latitude'], -90, 90),
+                'longitude' => $this->coordinate($old['longitude'], -180, 180),
                 'contact_name' => $this->nullable($old['contact_name']),
                 'contact_phone' => $this->nullable($old['contact_phone']),
                 'contact_vk' => $this->nullable($old['contact_vk']),
             ]);
+
+            $storedMedia = $this->media->store($adId, $mediaValidation['items']);
+            $this->ads->createMedia($adId, $storedMedia);
+
+            $this->ads->commit();
         } catch (Throwable) {
+            if ($transactionStarted) {
+                try {
+                    $this->ads->rollback();
+                } catch (Throwable) {
+                }
+            }
+
+            $this->media->deleteStored($storedMedia);
+
             return $this->formData($old, [
                 'form' => 'Не удалось сохранить объявление. Проверьте подключение к базе и попробуйте еще раз.',
             ]);
@@ -85,6 +114,7 @@ final class SubmitAdController
         return [
             'categories' => $this->categories,
             'csrfToken' => $this->csrfToken(),
+            'yandexMapsApiKey' => $this->yandexMapsApiKey,
             'old' => array_merge($this->emptyOldInput(), $old),
             'errors' => $errors,
             'messages' => $messages,
@@ -102,6 +132,8 @@ final class SubmitAdController
             'body' => '',
             'city' => '',
             'address' => '',
+            'latitude' => '',
+            'longitude' => '',
             'contact_name' => '',
             'contact_phone' => '',
             'contact_vk' => '',
@@ -120,6 +152,8 @@ final class SubmitAdController
             'body' => $this->clean($input['body'] ?? ''),
             'city' => $this->clean($input['city'] ?? '', 255),
             'address' => $this->clean($input['address'] ?? '', 500),
+            'latitude' => $this->clean($input['latitude'] ?? '', 32),
+            'longitude' => $this->clean($input['longitude'] ?? '', 32),
             'contact_name' => $this->clean($input['contact_name'] ?? '', 255),
             'contact_phone' => $this->clean($input['contact_phone'] ?? '', 100),
             'contact_vk' => $this->clean($input['contact_vk'] ?? '', 255),

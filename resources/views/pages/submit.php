@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 $categories = $viewData['categories'] ?? [];
 $csrfToken = (string) ($viewData['csrfToken'] ?? '');
+$yandexMapsApiKey = (string) ($viewData['yandexMapsApiKey'] ?? '');
 $old = $viewData['old'] ?? [];
 $errors = $viewData['errors'] ?? [];
 $value = static fn (string $key): string => (string) ($old[$key] ?? '');
@@ -15,10 +16,10 @@ $hasError = static fn (string $key): bool => isset($errors[$key]);
     <p class="lead">Заполните объявление. После отправки оно попадет на модерацию и появится в каталоге после проверки.</p>
 </section>
 
-<form class="panel form ad-form" method="post" action="/submit" novalidate data-ad-form>
+<form class="panel form ad-form" method="post" action="/submit" enctype="multipart/form-data" novalidate data-ad-form>
     <input type="hidden" name="_token" value="<?= e($csrfToken) ?>">
-    <input type="hidden" name="latitude" value="">
-    <input type="hidden" name="longitude" value="">
+    <input type="hidden" name="latitude" value="<?= e($value('latitude')) ?>" data-latitude-input>
+    <input type="hidden" name="longitude" value="<?= e($value('longitude')) ?>" data-longitude-input>
     <input
         class="honeypot"
         type="text"
@@ -58,17 +59,61 @@ $hasError = static fn (string $key): bool => isset($errors[$key]);
         <?php endif; ?>
     </label>
 
-    <div class="form-grid">
-        <label class="field">
-            <span>Город</span>
-            <input name="city" type="text" value="<?= e($value('city')) ?>" maxlength="255" autocomplete="address-level2">
-        </label>
+    <section class="form-section" aria-labelledby="submit-location-title">
+        <h2 id="submit-location-title">Место</h2>
+        <p class="form-hint">Кликните по карте, чтобы указать место. Город и адрес можно отредактировать вручную.</p>
 
-        <label class="field">
-            <span>Адрес</span>
-            <input name="address" type="text" value="<?= e($value('address')) ?>" maxlength="500" autocomplete="street-address">
-        </label>
-    </div>
+        <?php if ($yandexMapsApiKey !== ''): ?>
+            <div
+                class="submit-map"
+                id="submit-map"
+                data-yandex-map
+                data-api-key="<?= e($yandexMapsApiKey) ?>"
+                data-latitude="<?= e($value('latitude')) ?>"
+                data-longitude="<?= e($value('longitude')) ?>"
+            >
+                <div class="map-loading">Карта загружается...</div>
+            </div>
+            <p class="coordinate-hint" data-coordinate-output>
+                <?php if ($value('latitude') !== '' && $value('longitude') !== ''): ?>
+                    Точка выбрана: <?= e($value('latitude')) ?>, <?= e($value('longitude')) ?>
+                <?php else: ?>
+                    Точка пока не выбрана.
+                <?php endif; ?>
+            </p>
+        <?php else: ?>
+            <div class="map-fallback">
+                Карта сейчас не подключена. Форму можно отправить без карты, город и адрес заполните вручную.
+            </div>
+        <?php endif; ?>
+
+        <div class="form-grid">
+            <label class="field">
+                <span>Город</span>
+                <input name="city" type="text" value="<?= e($value('city')) ?>" maxlength="255" autocomplete="address-level2" data-city-input>
+            </label>
+
+            <label class="field">
+                <span>Адрес</span>
+                <input name="address" type="text" value="<?= e($value('address')) ?>" maxlength="500" autocomplete="street-address" data-address-input>
+            </label>
+        </div>
+    </section>
+
+    <label class="field<?= $hasError('media') ? ' field-invalid' : '' ?>">
+        <span>Фото и видео</span>
+        <input
+            class="file-input"
+            name="media[]"
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime"
+        >
+        <small class="form-hint">До 10 файлов. Изображения до 8 МБ, видео до 50 МБ. Можно загрузить только одно видео. SVG не принимается.</small>
+        <?php if ($hasError('media')): ?>
+            <small class="field-error"><?= e($errors['media']) ?></small>
+        <?php endif; ?>
+    </label>
 
     <div class="form-grid">
         <label class="field">

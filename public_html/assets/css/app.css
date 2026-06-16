@@ -256,6 +256,22 @@ h2 {
   gap: 18px;
 }
 
+.form-section {
+  display: grid;
+  gap: 14px;
+}
+
+.form-section h2 {
+  margin-bottom: 0;
+}
+
+.form-hint,
+.coordinate-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -317,6 +333,27 @@ textarea {
   gap: 12px;
 }
 
+.file-input {
+  padding: 10px;
+}
+
+.file-input::file-selector-button {
+  min-height: 38px;
+  margin-right: 12px;
+  border: 0;
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  color: #ffffff;
+  background: var(--accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.file-input::file-selector-button:hover {
+  background: var(--accent-strong);
+}
+
 .honeypot {
   position: absolute !important;
   left: -10000px !important;
@@ -327,6 +364,35 @@ textarea {
   border: 0 !important;
   opacity: 0 !important;
   overflow: hidden !important;
+}
+
+.submit-map {
+  position: relative;
+  min-height: 360px;
+  height: clamp(360px, 44vw, 460px);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #eef4ef;
+}
+
+.map-loading,
+.map-fallback {
+  display: grid;
+  min-height: 160px;
+  place-items: center;
+  border: 1px dashed #9db5a8;
+  border-radius: var(--radius);
+  padding: 18px;
+  color: var(--muted);
+  background: #f9fbf9;
+  text-align: center;
+}
+
+.submit-map .map-loading {
+  position: absolute;
+  inset: 0;
+  border: 0;
 }
 
 .map-placeholder {
@@ -372,5 +438,9 @@ textarea {
 
   .form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .submit-map {
+    height: 360px;
   }
 }

@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use HelpTeam\Controller\SubmitAdController;
+use HelpTeam\Controller\ReverseGeocodeController;
 use HelpTeam\Repository\AdRepository;
+use HelpTeam\Service\MediaUploadService;
 
 $appRoot = dirname(__DIR__) . '/help-team-site';
 
@@ -36,14 +38,25 @@ $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 $path = rtrim($path, '/') ?: '/';
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
+if ($path === '/api/geocode/reverse') {
+    if ($method !== 'POST') {
+        jsonResponse(['ok' => false, 'message' => 'Метод не поддерживается.'], 405);
+    }
+
+    $controller = new ReverseGeocodeController(env('YANDEX_GEOCODER_API_KEY', '') ?? '');
+    $result = $controller->handle(file_get_contents('php://input') ?: '');
+
+    jsonResponse($result['payload'], $result['status']);
+}
+
 $route = $routes[$path] ?? null;
 $viewData = [];
 
 if ($path === '/submit') {
-    $controller = submitAdController($appRoot);
+    $controller = submitAdController($appRoot, __DIR__);
 
     if ($method === 'POST') {
-        $result = $controller->submit($_POST);
+        $result = $controller->submit($_POST, $_FILES);
 
         if (isset($result['redirect'])) {
             header('Location: ' . $result['redirect'], true, 303);
@@ -77,12 +90,25 @@ $view = $route['view'];
 
 require $appRoot . '/resources/views/layout.php';
 
-function submitAdController(string $appRoot): SubmitAdController
+function submitAdController(string $appRoot, string $publicPath): SubmitAdController
 {
     $config = require $appRoot . '/config/ads.php';
 
     return new SubmitAdController(
         new AdRepository(),
-        $config['categories'] ?? []
+        new MediaUploadService($publicPath),
+        $config['categories'] ?? [],
+        env('YANDEX_MAPS_API_KEY', '') ?? ''
     );
+}
+
+/**
+ * @param array<string, mixed> $payload
+ */
+function jsonResponse(array $payload, int $status = 200): never
+{
+    http_response_code($status);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
 }

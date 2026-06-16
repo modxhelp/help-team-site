@@ -1,0 +1,17 @@
+{
+  "name": "help-team/site",
+  "description": "Help Team classifieds site scaffold.",
+  "type": "project",
+  "require": {
+    "php": "^8.5",
+    "gabordemooij/redbean": "^5.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "HelpTeam\\": "app/"
+    }
+  },
+  "config": {
+    "sort-packages": true
+  }
+}

@@ -19,7 +19,16 @@ $hasError = static fn (string $key): bool => isset($errors[$key]);
     <input type="hidden" name="_token" value="<?= e($csrfToken) ?>">
     <input type="hidden" name="latitude" value="">
     <input type="hidden" name="longitude" value="">
-    <input class="honeypot" type="text" name="website" value="" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <input
+        class="honeypot"
+        type="text"
+        name="website"
+        value=""
+        tabindex="-1"
+        autocomplete="off"
+        aria-hidden="true"
+        style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;opacity:0;"
+    >
 
     <label class="field<?= $hasError('category') ? ' field-invalid' : '' ?>">
         <span>Категория <b aria-hidden="true">*</b></span>

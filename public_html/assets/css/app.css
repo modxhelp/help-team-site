@@ -219,6 +219,111 @@ h2 {
   padding: 24px;
 }
 
+.filters {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) minmax(220px, 1.4fr) auto;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.ad-card {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.ad-card-image,
+.ad-card-placeholder {
+  width: 100%;
+  height: 220px;
+}
+
+.ad-card-image {
+  display: block;
+  object-fit: cover;
+}
+
+.ad-card-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--accent-strong);
+  background:
+    linear-gradient(135deg, rgb(35 122 87 / 12%), transparent 55%),
+    var(--surface-muted);
+  font-weight: 800;
+}
+
+.ad-card-body {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.ad-card-badges,
+.ad-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ad-card-meta {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.ad-card h2 {
+  margin-bottom: 0;
+  font-size: 1.2rem;
+  line-height: 1.25;
+}
+
+.ad-card p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+
+.ad-card-address {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+  color: var(--muted);
+  font-size: 0.94rem;
+}
+
+.badge-category {
+  color: var(--accent-strong);
+}
+
+.badge-status {
+  color: #175d36;
+  background: var(--success-bg);
+}
+
+.empty-state {
+  display: grid;
+  gap: 14px;
+  max-width: 680px;
+}
+
+.empty-state h2,
+.empty-state p {
+  margin-bottom: 0;
+}
+
 .messages {
   display: grid;
   gap: 10px;
@@ -417,6 +522,16 @@ textarea {
   background: var(--surface);
 }
 
+@media (max-width: 1040px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 800px) {
   .topbar {
     align-items: flex-start;
@@ -434,6 +549,16 @@ textarea {
 
   .grid {
     grid-template-columns: 1fr;
+  }
+
+  .filters,
+  .catalog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ad-card-image,
+  .ad-card-placeholder {
+    height: 190px;
   }
 
   .form-grid {

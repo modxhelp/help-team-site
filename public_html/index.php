@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-use HelpTeam\Controller\SubmitAdController;
 use HelpTeam\Controller\ReverseGeocodeController;
+use HelpTeam\Controller\SubmitAdController;
 use HelpTeam\Repository\AdRepository;
 use HelpTeam\Service\MediaUploadService;
+use HelpTeam\Support\Logger;
 
 $appRoot = dirname(__DIR__) . '/help-team-site';
 
@@ -52,7 +53,9 @@ if ($path === '/api/geocode/reverse') {
 $route = $routes[$path] ?? null;
 $viewData = [];
 
-if ($path === '/submit') {
+if ($path === '/' && $method === 'GET') {
+    $viewData = homeData($appRoot);
+} elseif ($path === '/submit') {
     $controller = submitAdController($appRoot, __DIR__);
 
     if ($method === 'POST') {
@@ -100,6 +103,63 @@ function submitAdController(string $appRoot, string $publicPath): SubmitAdContro
         $config['categories'] ?? [],
         env('YANDEX_MAPS_API_KEY', '') ?? ''
     );
+}
+
+/**
+ * @return array<string, mixed>
+ */
+function homeData(string $appRoot): array
+{
+    $config = require $appRoot . '/config/ads.php';
+    $categories = is_array($config['categories'] ?? null) ? $config['categories'] : [];
+    $statuses = is_array($config['statuses'] ?? null) ? $config['statuses'] : [];
+    $filters = homeFilters($categories);
+    $ads = [];
+
+    try {
+        $ads = (new AdRepository())->findPublishedWithFirstMedia($filters, 30);
+    } catch (Throwable $exception) {
+        Logger::error('home.ads_load_failed', [
+            'exception' => $exception::class,
+            'message' => $exception->getMessage(),
+        ]);
+    }
+
+    return [
+        'ads' => $ads,
+        'categories' => $categories,
+        'statuses' => $statuses,
+        'filters' => $filters,
+    ];
+}
+
+/**
+ * @param array<string, string> $categories
+ * @return array{category: string, city: string, q: string}
+ */
+function homeFilters(array $categories): array
+{
+    $category = normalizeQueryValue($_GET['category'] ?? '', 50);
+
+    if ($category !== '' && !isset($categories[$category])) {
+        $category = '';
+    }
+
+    return [
+        'category' => $category,
+        'city' => normalizeQueryValue($_GET['city'] ?? '', 255),
+        'q' => normalizeQueryValue($_GET['q'] ?? '', 255),
+    ];
+}
+
+function normalizeQueryValue(mixed $value, int $maxLength): string
+{
+    $value = trim((string) $value);
+    $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $value) ?? $value;
+
+    return function_exists('mb_substr')
+        ? mb_substr($value, 0, $maxLength)
+        : substr($value, 0, $maxLength);
 }
 
 /**
